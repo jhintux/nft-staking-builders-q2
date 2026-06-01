@@ -1,7 +1,8 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token_interface::{Mint, TokenInterface};
-//use mpl_core::accounts::BaseCollectionV1;
+use mpl_core::accounts::BaseCollectionV1;
 
+use crate::rewards;
 use crate::state::Config;
 
 #[derive(Accounts)]
@@ -25,8 +26,7 @@ pub struct Initialize<'info> {
         bump,
     )]
     pub rewards_mint: InterfaceAccount<'info, Mint>,
-    /// CHECK : BaseCollectionV1
-    pub collection: UncheckedAccount<'info>,
+    pub collection: Account<'info, BaseCollectionV1>,
     pub token_program: Interface<'info, TokenInterface>,
     pub system_program: Program<'info, System>,
 }
@@ -34,18 +34,18 @@ pub struct Initialize<'info> {
 impl<'info> Initialize<'info> {
     pub fn initialize(
         &mut self,
-        reward_rate_per_day: u64,
+        reward_rate_per_sec: u64,
         freeze_period: u16,
         bumps: &InitializeBumps,
     ) -> Result<()> {
+        rewards::require_whole_token_rate(reward_rate_per_sec)?;
+
         self.config.set_inner(Config {
-            reward_rate_per_day,
+            reward_rate_per_sec,
             freeze_period,
             rewards_bump: bumps.rewards_mint,
             config_bump: bumps.config,
         });
-
-        
 
         Ok(())
     }

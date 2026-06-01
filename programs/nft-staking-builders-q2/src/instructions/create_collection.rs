@@ -46,8 +46,8 @@ impl<'info> CreateCollection<'info> {
             &[bumps.update_authority],
         ]];
 
-        mpl_core::instructions::CreateV1CpiBuilder::new(&self.mpl_program.to_account_info())
-            .asset(&self.collection.to_account_info())
+        mpl_core::instructions::CreateCollectionV2CpiBuilder::new(&self.mpl_program.to_account_info())
+            .collection(&self.collection.to_account_info())
             .payer(&self.payer.to_account_info())
             .system_program(&self.system_program.to_account_info())
             .update_authority(Some(&self.update_authority.to_account_info()))

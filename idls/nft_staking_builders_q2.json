@@ -153,10 +153,7 @@
           }
         },
         {
-          "name": "collection",
-          "docs": [
-            "CHECK : BaseCollectionV1"
-          ]
+          "name": "collection"
         },
         {
           "name": "token_program"
@@ -191,6 +188,56 @@
       ],
       "accounts": [
         {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "asset",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "collection",
+          "writable": true
+        },
+        {
+          "name": "update_authority",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  117,
+                  112,
+                  100,
+                  97,
+                  116,
+                  101,
+                  95,
+                  97,
+                  117,
+                  116,
+                  104,
+                  111,
+                  114,
+                  105,
+                  116,
+                  121
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "collection"
+              }
+            ]
+          }
+        },
+        {
+          "name": "mpl_program",
+          "address": "CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4PZNhX7d"
+        },
+        {
           "name": "system_program",
           "address": "11111111111111111111111111111111"
         }
@@ -208,6 +255,12 @@
     }
   ],
   "accounts": [
+    {
+      "name": "BaseCollectionV1",
+      "discriminator": [
+        5
+      ]
+    },
     {
       "name": "Config",
       "discriminator": [
@@ -227,9 +280,60 @@
       "code": 6000,
       "name": "IncorrectMplProgram",
       "msg": "Incorrect MPL program"
+    },
+    {
+      "code": 6001,
+      "name": "AttributesPluginNotFound",
+      "msg": "Attributes plugin not found"
+    },
+    {
+      "code": 6002,
+      "name": "AlreadyStaked",
+      "msg": "Already staked"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidUpdateAuthority",
+      "msg": "Invalid update authority"
     }
   ],
   "types": [
+    {
+      "name": "BaseCollectionV1",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "key",
+            "type": {
+              "defined": {
+                "name": "Key"
+              }
+            }
+          },
+          {
+            "name": "update_authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "name": "uri",
+            "type": "string"
+          },
+          {
+            "name": "num_minted",
+            "type": "u32"
+          },
+          {
+            "name": "current_size",
+            "type": "u32"
+          }
+        ]
+      }
+    },
     {
       "name": "Config",
       "type": {
@@ -250,6 +354,32 @@
           {
             "name": "config_bump",
             "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Key",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Uninitialized"
+          },
+          {
+            "name": "AssetV1"
+          },
+          {
+            "name": "HashedAssetV1"
+          },
+          {
+            "name": "PluginHeaderV1"
+          },
+          {
+            "name": "PluginRegistryV1"
+          },
+          {
+            "name": "CollectionV1"
           }
         ]
       }
