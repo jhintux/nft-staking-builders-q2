@@ -70,9 +70,10 @@ impl<'info> Unstake<'info> {
     pub fn unstake(&mut self, bumps: &UnstakeBumps) -> Result<()> {
         let now = Clock::get()?.unix_timestamp;
 
+        let collection_key = self.collection.key();
         let signers_seeds: &[&[&[u8]]] = &[&[
             b"update_authority",
-            self.update_authority.key.as_ref(),
+            collection_key.as_ref(),
             &[bumps.update_authority],
         ]];
 
@@ -184,18 +185,18 @@ impl<'info> Unstake<'info> {
             .asset(&self.asset.to_account_info())
             .collection(Some(&self.collection.to_account_info()))
             .payer(&self.owner.to_account_info())
-            .authority(Some(&self.update_authority.to_account_info()))
+            .authority(Some(&self.owner.to_account_info()))
             .system_program(&self.system_program.to_account_info())
             .plugin(Plugin::FreezeDelegate(FreezeDelegate { frozen: false }))
-            .invoke_signed(signers_seeds)?;
+            .invoke()?;
         RemovePluginV1CpiBuilder::new(&self.mpl_program.to_account_info())
             .asset(&self.asset.to_account_info())
             .collection(Some(&self.collection.to_account_info()))
             .payer(&self.owner.to_account_info())
-            .authority(Some(&self.update_authority.to_account_info()))
+            .authority(Some(&self.owner.to_account_info()))
             .system_program(&self.system_program.to_account_info())
             .plugin_type(PluginType::FreezeDelegate)
-            .invoke_signed(signers_seeds)?;
+            .invoke()?;
 
         Ok(())
     }

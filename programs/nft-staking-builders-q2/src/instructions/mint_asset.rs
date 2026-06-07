@@ -1,5 +1,8 @@
 use anchor_lang::prelude::*;
-use mpl_core::accounts::BaseCollectionV1;
+use mpl_core::{
+    accounts::BaseCollectionV1,
+    types::{FreezeDelegate, Plugin, PluginAuthority, PluginAuthorityPair},
+};
 
 use crate::errors::StakingError;
 
@@ -32,22 +35,27 @@ impl<'info> MintAsset<'info> {
         asset_uri: String,
         bumps: &MintAssetBumps,
     ) -> Result<()> {
+        let collection_key = self.collection.key();
         let signers_seeds: &[&[&[u8]]] = &[&[
             b"update_authority",
-            self.update_authority.key.as_ref(),
+            collection_key.as_ref(),
             &[bumps.update_authority],
         ]];
 
         mpl_core::instructions::CreateV2CpiBuilder::new(&self.mpl_program.to_account_info())
             .asset(&self.asset.to_account_info())
             .collection(Some(&self.collection.to_account_info()))
-            .authority(Some(&self.payer.to_account_info()))
+            .authority(Some(&self.update_authority.to_account_info()))
             .payer(&self.payer.to_account_info())
             .owner(Some(&self.payer.to_account_info()))
             .update_authority(None)
             .system_program(&self.system_program.to_account_info())
             .name(asset_name)
             .uri(asset_uri)
+            .plugins(vec![PluginAuthorityPair {
+                plugin: Plugin::FreezeDelegate(FreezeDelegate { frozen: false }),
+                authority: Some(PluginAuthority::Owner),
+            }])
             .invoke_signed(signers_seeds)?;
 
         Ok(())

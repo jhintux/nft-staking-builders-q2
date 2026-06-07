@@ -41,9 +41,10 @@ impl<'info> Stake<'info> {
         let now = Clock::get()?.unix_timestamp;
         let now_str = now.to_string();
 
+        let collection_key = self.collection.key();
         let signers_seeds: &[&[&[u8]]] = &[&[
             b"update_authority",
-            self.update_authority.key.as_ref(),
+            collection_key.as_ref(),
             &[bumps.update_authority],
         ]];
         
@@ -121,15 +122,14 @@ impl<'info> Stake<'info> {
             }
         }
 
-        AddPluginV1CpiBuilder::new(&self.mpl_program.to_account_info())
+        UpdatePluginV1CpiBuilder::new(&self.mpl_program.to_account_info())
             .asset(&self.asset.to_account_info())
             .collection(Some(&self.collection.to_account_info()))
             .payer(&self.owner.to_account_info())
-            .authority(Some(&self.update_authority.to_account_info()))
+            .authority(Some(&self.owner.to_account_info()))
             .system_program(&self.system_program.to_account_info())
             .plugin(Plugin::FreezeDelegate(FreezeDelegate { frozen: true }))
-            .init_authority(PluginAuthority::UpdateAuthority)
-            .invoke_signed(signers_seeds)?;
+            .invoke()?;
 
         Ok(())
     }

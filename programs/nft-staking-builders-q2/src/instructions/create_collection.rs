@@ -42,7 +42,7 @@ impl<'info> CreateCollection<'info> {
 
         let signers_seeds: &[&[&[u8]]] = &[&[
             b"update_authority",
-            self.update_authority.key.as_ref(),
+            self.collection.key.as_ref(),
             &[bumps.update_authority],
         ]];
 

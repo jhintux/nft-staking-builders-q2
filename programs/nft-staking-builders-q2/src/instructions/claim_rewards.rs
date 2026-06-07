@@ -120,9 +120,10 @@ impl<'info> ClaimRewards<'info> {
             value: now.to_string(),
         });
 
+        let collection_key = self.collection.key();
         let signers_seeds: &[&[&[u8]]] = &[&[
             b"update_authority",
-            self.update_authority.key.as_ref(),
+            collection_key.as_ref(),
             &[bumps.update_authority],
         ]];
 
